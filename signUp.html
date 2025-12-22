@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sign Up - WIL Platform</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-blue-50 text-gray-800">
+
+  <!-- Header -->
+  <header class="bg-white shadow">
+    <div class="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
+      <h1 class="text-2xl font-bold text-blue-600">WIL Platform</h1>
+      <nav class="space-x-6 text-sm">
+        <a href="index.html" class="hover:text-blue-600">About Us</a>
+        <a href="#" class="hover:text-blue-600">Our Vision</a>
+        <a href="#" class="hover:text-blue-600">Team</a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Hero -->
+  <section class="text-center py-10 bg-blue-100">
+    <h2 class="text-3xl font-bold text-blue-700">Sign-Up and Start Your Journey</h2>
+  </section>
+
+  <!-- Main Form -->
+  <main class="max-w-3xl mx-auto px-4 py-10 bg-white rounded-xl shadow-md">
+    <div id="form-container">
+
+      <!-- Section 1: Personal Info -->
+      <form class="form-section" id="section1">
+        <h3 class="text-xl font-semibold mb-4 text-blue-700">Personal Information</h3>
+        <label class="block mb-2">First Name:</label>
+        <input type="text" id="firstName" required class="w-full mb-4 px-4 py-2 border rounded" />
+        <label class="block mb-2">Middle Name (optional):</label>
+        <input type="text" id="middleName" class="w-full mb-4 px-4 py-2 border rounded" />
+        <label class="block mb-2">Last Name:</label>
+        <input type="text" id="lastName" required class="w-full mb-4 px-4 py-2 border rounded" />
+        <div class="flex justify-between mt-6">
+          <button type="button" onclick="nextSection(2, 'section1')"
+            class="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700">Next</button>
+          <a href="logIn.html" class="text-sm text-blue-600 hover:underline">Already have an account?</a>
+        </div>
+      </form>
+
+      <!-- Section 2: Contact -->
+      <form class="form-section hidden" id="section2">
+        <h3 class="text-xl font-semibold mb-4 text-blue-700">Contact Details</h3>
+        <label class="block mb-2">Phone Number:</label>
+        <input type="tel" id="phone" required class="w-full mb-4 px-4 py-2 border rounded" />
+        <label class="block mb-2">Email:</label>
+        <input type="email" id="email" required class="w-full mb-4 px-4 py-2 border rounded" />
+        <div class="flex justify-between mt-6">
+          <button type="button" onclick="previousSection(1)"
+            class="bg-gray-300 px-6 py-2 rounded hover:bg-gray-400">Back</button>
+          <button type="button" onclick="nextSection(3, 'section2')"
+            class="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700">Next</button>
+        </div>
+      </form>
+
+      <!-- Section 3: Account + Role + Dynamic Select -->
+      <form class="form-section hidden" id="section3">
+        <h3 class="text-xl font-semibold mb-4 text-blue-700">Account Setup</h3>
+        <label class="block mb-2">Password:</label>
+        <input type="password" id="password" required class="w-full mb-4 px-4 py-2 border rounded" />
+        <label class="block mb-2">Confirm Password:</label>
+        <input type="password" id="confirmPassword" required class="w-full mb-4 px-4 py-2 border rounded" />
+        <p id="passwordError" class="text-red-500 text-sm hidden">Passwords do not match.</p>
+
+        <label class="block mb-2">Category:</label>
+        <select id="category" required class="w-full mb-4 px-4 py-2 border rounded">
+          <option value="">-- Select Role --</option>
+          <option value="student">Student</option>
+          <option value="lecture">Lecturer</option>
+          <option value="coordinator">Coordinator</option>
+          <option value="will-firm">WIL Firm</option>
+        </select>
+
+        <div id="external-company-name-group" class="hidden">
+          <label for="external-company-name" class="block mb-2">Company Name:</label>
+          <input type="text" id="external-company-name" class="w-full mb-4 px-4 py-2 border rounded"
+            placeholder="Enter your company name" />
+        </div>
+
+        <div id="dynamic-select" class="hidden">
+          <label id="dynamic-label" class="block mb-2 text-gray-700"></label>
+          <select id="dynamic-options" required class="w-full mb-4 px-4 py-2 border rounded"></select>
+        </div>
+
+        <div class="flex justify-between mt-6">
+          <button type="button" onclick="previousSection(2)"
+            class="bg-gray-300 px-6 py-2 rounded hover:bg-gray-400">Back</button>
+          <button type="button" id="section3-next"
+            class="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700 hidden">Next</button>
+          <button type="button" id="section3-submit"
+            class="bg-green-600 text-white px-6 py-2 rounded hover:bg-green-700 hidden">Submit</button>
+        </div>
+      </form>
+
+      <!-- Section 5: WIL Firm Details -->
+      <form class="form-section hidden" id="section5">
+        <h3 class="text-xl font-semibold mb-4 text-blue-700">WIL Firm Details</h3>
+        <label class="block mb-2">Company Name:</label>
+        <input type="text" id="company-name" class="w-full mb-4 px-4 py-2 border rounded" required />
+
+        <!-- Proof of Registration Upload -->
+        <label class="block mb-2">Proof of Registration (PDF/Image):</label>
+        <input type="file" id="proof-registration" accept=".pdf,image/*" class="w-full mb-4 px-4 py-2 border rounded" required />
+        <p id="proof-warning" class="text-red-500 hidden">You must upload a proof of registration file.</p>
+
+        <label class="block mb-2">Upload Pictures (5-10):</label>
+        <input type="file" id="upload-pics" accept="image/*" multiple class="w-full mb-4 px-4 py-2 border rounded" />
+        <p id="upload-warning" class="text-red-500 hidden">Please upload between 5 and 10 pictures.</p>
+
+        <label class="block mb-2">Firm Location:</label>
+        <input type="text" id="manual-location" class="w-full mb-4 px-4 py-2 border rounded" />
+
+        <label class="block mb-2">Description:</label>
+        <textarea id="description" rows="4" class="w-full mb-4 px-4 py-2 border rounded" required></textarea>
+
+        <label class="block mb-2" for="capacity">Firm Intake Capacity:</label>
+        <input type="number" id="capacity" min="1" class="w-full mb-4 px-4 py-2 border rounded"
+          placeholder="Enter number of interns/trainees the firm can take" required />
+
+        <div class="mb-4">
+          <label class="inline-flex items-center">
+            <input type="checkbox" id="paysSalaries" class="form-checkbox text-blue-600 mr-2" />
+            <span>Pays Salaries</span>
+          </label>
+        </div>
+
+        <div class="mb-4">
+          <label class="inline-flex items-center">
+            <input type="checkbox" id="offersAccommodation" class="form-checkbox text-blue-600 mr-2" />
+            <span>Offers On-Firm Accommodation</span>
+          </label>
+        </div>
+
+        <div class="flex justify-between mt-6">
+          <button type="button" onclick="previousSection(3)"
+            class="bg-gray-300 px-6 py-2 rounded hover:bg-gray-400">Back</button>
+          <button type="button" onclick="submitWilFirmDetails()"
+            class="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700">Submit</button>
+        </div>
+      </form>
+
+      <!-- Section 6: Preview -->
+      <div id="section6" class="form-section hidden">
+        <h3 class="text-xl font-semibold mb-4 text-blue-700">Preview Your Details And Capture The User Code!!</h3>
+        <div id="preview-output" class="bg-gray-100 p-4 rounded border mb-4"></div>
+        <div class="flex justify-between">
+          <button onclick="goToSection(1)" class="bg-gray-300 px-6 py-2 rounded hover:bg-gray-400">Edit</button>
+          <button onclick="finalizeSignup()" id="submit"
+            class="bg-green-600 text-white px-6 py-2 rounded hover:bg-green-700">Continue</button>
+        </div>
+      </div>
+
+      <!-- Loading Modal (added) -->
+      <div id="loadingModal" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-40 hidden z-40">
+        <div class="bg-white rounded-lg p-6 text-center max-w-lg w-full mx-4">
+          <h3 id="loadingTitle" class="text-lg font-semibold mb-3">Processing</h3>
+          <p id="statusMessage" class="mb-4 text-sm text-gray-700">Preparing...</p>
+
+          <div class="relative w-full bg-gray-200 rounded h-4 overflow-hidden">
+            <div id="loadingProgress" class="h-4 bg-blue-600" style="width:0%"></div>
+          </div>
+          <div class="mt-2 text-sm text-gray-600"><span id="percentLabel">0%</span></div>
+        </div>
+      </div>
+
+      <!-- Success Modal -->
+      <div id="successModal" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 hidden">
+        <div class="bg-white rounded-lg p-6 text-center max-w-md">
+          <h3 class="text-lg font-semibold mb-4 text-green-700">Success!</h3>
+          <p>Your registration was successful. Redirecting to login...</p>
+          <button onclick="redirectToLogin()"
+            class="mt-4 bg-green-600 text-white px-6 py-2 rounded hover:bg-green-700">OK</button>
+        </div>
+      </div>
+
+      <div id="failModal" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 hidden">
+        <div class="bg-white rounded-lg p-6 text-center max-w-md">
+          <h3 class="text-lg font-semibold mb-4 text-red-700">Registration Failed</h3>
+          <p id="failMessage" class="text-gray-700">An error occurred during registration.</p>
+          <button onclick="closeFailModal()" class="mt-4 bg-red-600 text-white px-6 py-2 rounded hover:bg-red-700">Try
+            Again</button>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- keep your multi-step controller as-is -->
+  <script defer src="javascript.js"></script>
+  <!-- register.js (module) -->
+  <script type="module" src="register.js" defer></script>
+
+</body>
+
+</html>

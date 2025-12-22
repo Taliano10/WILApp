@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>WELAP - User Profile</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Firebase v8 (provides global `firebase`) - required for some legacy auth/password flows -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-storage.js"></script>
+
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+
+  <style>
+    /* modal helpers */
+    .modal-fixed { position: fixed; inset: 0; display: none; align-items: center; justify-content: center; z-index: 9999; }
+    .modal-visible { display: flex !important; }
+    .modal-backdrop { position: absolute; inset: 0; background: rgba(0,0,0,0.45); }
+    .modal-card { position: relative; z-index: 10000; }
+
+    /* progress bar */
+    .progress-track { background: #e5e7eb; height: 10px; border-radius: 999px; overflow: hidden; }
+    .progress-fill { height: 100%; border-radius: 999px; width: 0%; transition: width .15s linear; background: linear-gradient(90deg,#10b981,#3b82f6); }
+
+    /* image modal */
+    .image-modal-img { max-height: 80vh; max-width: 90vw; object-fit: contain; }
+
+    /* burger menu */
+    .burger-menu { position: relative; }
+    .burger-dropdown { 
+      position: absolute; 
+      top: 100%; 
+      left: 0; 
+      background: white; 
+      min-width: 200px; 
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15); 
+      border-radius: 8px; 
+      z-index: 1000;
+      display: none;
+      padding: 8px 0;
+    }
+    .burger-dropdown.show { display: block; }
+    .burger-dropdown a { 
+      display: block; 
+      padding: 10px 16px; 
+      color: #333; 
+      text-decoration: none; 
+      transition: background 0.2s;
+    }
+    .burger-dropdown a:hover { background: #f5f5f5; }
+  </style>
+</head>
+<body class="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen font-sans">
+
+  <!-- injected header -->
+  <div id="roleHeaderContainer"></div>
+
+  <main class="max-w-6xl mx-auto px-4 py-8">
+    <div class="text-center mb-8">
+      <h2 id="profileTitle" class="text-4xl font-bold text-gray-800 mb-2">User Profile</h2>
+      <p class="text-gray-600">Manage your account settings and personal information</p>
+    </div>
+
+    <div class="grid grid-cols-1 xl:grid-cols-3 gap-8">
+      <!-- left column -->
+      <div class="xl:col-span-1 space-y-6">
+        <!-- profile visual -->
+      
+
+      <!-- right -->
+      <div class="xl:col-span-2 space-y-6">
+        <!-- personal -->
+        <div class="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
+          <div class="bg-gradient-to-r from-blue-500 to-blue-600 px-6 py-4">
+            <h3 class="text-xl font-semibold text-white flex items-center"><i class="fas fa-user-circle mr-3"></i>Personal Information</h3>
+          </div>
+          <div class="p-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div><label class="block text-sm font-semibold text-gray-700 mb-2">First Name *</label><input id="firstName" class="w-full px-4 py-3 border rounded-xl"></div>
+              <div><label class="block text-sm font-semibold text-gray-700 mb-2">Middle Name</label><input id="middleName" class="w-full px-4 py-3 border rounded-xl"></div>
+              <div><label class="block text-sm font-semibold text-gray-700 mb-2">Last Name *</label><input id="lastName" class="w-full px-4 py-3 border rounded-xl"></div>
+              <div><label class="block text-sm font-semibold text-gray-700 mb-2">Phone *</label><input id="phone" class="w-full px-4 py-3 border rounded-xl"></div>
+            </div>
+            <div class="mt-6">
+              <button id="savePersonalBtn" class="bg-gradient-to-r from-green-500 to-green-600 text-white px-8 py-3 rounded-xl font-semibold"><i class="fas fa-save mr-2"></i><span id="savePersonalBtnText">Save Personal Info</span></button>
+              <div id="personalStatus" class="text-sm font-semibold mt-3"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- role -->
+        <div class="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
+          <div class="bg-gradient-to-r from-purple-500 to-purple-600 px-6 py-4">
+            <h3 class="text-xl font-semibold text-white flex items-center"><i class="fas fa-briefcase mr-3"></i><span id="roleSpecificTitle">Role Information</span></h3>
+          </div>
+          <div class="p-6">
+            <div id="dynamicFieldsContainer" class="grid grid-cols-1 md:grid-cols-2 gap-6"></div>
+            <div class="mt-6">
+              <button id="saveRoleBtn" class="bg-gradient-to-r from-purple-500 to-purple-600 text-white px-8 py-3 rounded-xl font-semibold"><i class="fas fa-save mr-2"></i><span id="saveRoleBtnText">Save Role Info</span></button>
+              <div id="roleStatus" class="text-sm font-semibold mt-3"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- firm images -->
+        <div id="firmImagesCard" class="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden hidden">
+          <div class="bg-gradient-to-r from-teal-500 to-teal-600 px-6 py-4">
+            <h3 class="text-xl font-semibold text-white flex items-center"><i class="fas fa-images mr-3"></i>Firm Images</h3>
+          </div>
+          <div class="p-6">
+            <div id="firmImagesList" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 mb-6"></div>
+            <div class="flex items-center gap-4">
+              <input type="file" id="firmImageUpload" accept="image/*" multiple class="hidden">
+              <button id="uploadFirmImageBtn" class="bg-gradient-to-r from-teal-500 to-teal-600 text-white px-6 py-3 rounded-xl font-semibold"><i class="fas fa-upload mr-2"></i>Upload Images</button>
+              <button id="deleteAllFirmImagesBtn" class="bg-gradient-to-r from-red-500 to-red-600 text-white px-6 py-3 rounded-xl font-semibold"><i class="fas fa-trash mr-2"></i>Delete All</button>
+
+              <div class="ml-4 w-48">
+                <div id="firmImageProgress" class="progress-track hidden"><div id="firmImageProgressFill" class="progress-fill" style="width:0%"></div></div>
+                <div id="firmImageProgressText" class="text-xs text-gray-600 mt-1"></div>
+              </div>
+
+              <div id="firmImageUploadStatus" class="text-sm font-semibold"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- firm proof -->
+        <div id="firmProofCard" class="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden hidden">
+          <div class="bg-gradient-to-r from-amber-500 to-amber-600 px-6 py-4">
+            <h3 class="text-xl font-semibold text-white flex items-center"><i class="fas fa-file-contract mr-3"></i>Firm Proof of Registration</h3>
+          </div>
+          <div class="p-6">
+            <div id="firmProofDetails" class="mb-6 p-4 bg-gray-50 rounded-lg"><p class="text-gray-500 text-center">No proof of registration uploaded</p></div>
+            <div class="flex items-center gap-4">
+              <input type="file" id="firmProofUpload" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png" class="hidden">
+              <button id="uploadFirmProofBtn" class="bg-gradient-to-r from-amber-500 to-amber-600 text-white px-6 py-3 rounded-xl font-semibold"><i class="fas fa-upload mr-2"></i>Upload Proof</button>
+              <button id="updateFirmProofBtn" class="bg-gradient-to-r from-blue-500 to-blue-600 text-white px-6 py-3 rounded-xl font-semibold hidden"><i class="fas fa-sync mr-2"></i>Update Proof</button>
+              <button id="deleteFirmProofBtn" class="bg-gradient-to-r from-red-500 to-red-600 text-white px-6 py-3 rounded-xl font-semibold hidden"><i class="fas fa-trash mr-2"></i>Delete Proof</button>
+
+              <div class="ml-4 w-48">
+                <div id="firmProofProgress" class="progress-track hidden"><div id="firmProofProgressFill" class="progress-fill" style="width:0%"></div></div>
+                <div id="firmProofProgressText" class="text-xs text-gray-600 mt-1"></div>
+              </div>
+
+              <div id="firmProofUploadStatus" class="text-sm font-semibold"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- account/password similar to before -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div class="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
+            <div class="bg-gradient-to-r from-indigo-500 to-indigo-600 px-6 py-4">
+              <h3 class="text-xl font-semibold text-white flex items-center"><i class="fas fa-envelope mr-3"></i>Account Information</h3>
+            </div>
+            <div class="p-6">
+              <label class="block text-sm font-semibold text-gray-700 mb-2">Email Address</label>
+              <input id="email" class="w-full px-4 py-3 border rounded-xl">
+              <button id="saveEmailBtn" class="mt-6 bg-gradient-to-r from-indigo-500 to-indigo-600 text-white px-8 py-3 rounded-xl font-semibold w-full"><i class="fas fa-save mr-2"></i>Save Email</button>
+              <div id="emailStatus" class="text-sm font-semibold mt-3"></div>
+            </div>
+          </div>
+
+          <div class="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
+            <div class="bg-gradient-to-r from-orange-500 to-orange-600 px-6 py-4">
+              <h3 class="text-xl font-semibold text-white flex items-center"><i class="fas fa-lock mr-3"></i>Change Password</h3>
+            </div>
+            <div class="p-6">
+              <label class="block text-sm font-semibold text-gray-700 mb-2">Current Password</label>
+              <input id="currentPassword" type="password" class="w-full px-4 py-3 border rounded-xl mb-3">
+              <label class="block text-sm font-semibold text-gray-700 mb-2">New Password</label>
+              <input id="newPassword" type="password" class="w-full px-4 py-3 border rounded-xl mb-3">
+              <label class="block text-sm font-semibold text-gray-700 mb-2">Confirm New Password</label>
+              <input id="confirmNewPassword" type="password" class="w-full px-4 py-3 border rounded-xl mb-3">
+              <button id="savePasswordBtn" class="mt-2 bg-gradient-to-r from-orange-500 to-orange-600 text-white px-8 py-3 rounded-xl font-semibold w-full"><i class="fas fa-key mr-2"></i>Change Password</button>
+              <div id="passwordStatus" class="text-sm font-semibold mt-3"></div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </main>
+
+  <!-- image modal -->
+  <div id="imageModal" class="modal-fixed" aria-hidden="true" role="dialog" aria-modal="true">
+    <div class="modal-backdrop"></div>
+    <div class="modal-card bg-white rounded-lg shadow-lg p-4 max-w-6xl w-full mx-4">
+      <div class="flex justify-between items-start mb-3">
+        <div class="text-sm text-gray-600" id="imageModalMeta"></div>
+        <div class="flex items-center gap-2">
+          <button id="imageDownloadBtn" class="px-3 py-1 bg-green-500 text-white rounded">Download</button>
+          <button id="imageDeleteBtn" class="px-3 py-1 bg-red-600 text-white rounded">Delete</button>
+          <button id="imageCloseBtn" class="px-3 py-1 bg-gray-200 rounded">Close</button>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-4 justify-center">
+        <button id="imagePrevBtn" class="px-4 py-2 bg-gray-100 rounded hover:bg-gray-200">&larr; Prev</button>
+        <img id="imageModalImg" src="" alt="Firm image" class="image-modal-img rounded" />
+        <button id="imageNextBtn" class="px-4 py-2 bg-gray-100 rounded hover:bg-gray-200">Next &rarr;</button>
+      </div>
+
+      <div class="mt-3 text-sm text-gray-500" id="imagePositionText"></div>
+    </div>
+  </div>
+
+  <!-- confirm modal -->
+  <div id="confirmModal" class="modal-fixed" aria-hidden="true">
+    <div class="modal-backdrop"></div>
+    <div class="modal-card bg-white rounded-lg shadow-lg p-6 max-w-lg w-full mx-4">
+      <h3 id="confirmTitle" class="text-lg font-semibold mb-3">Confirm</h3>
+      <p id="confirmMessage" class="text-gray-700 mb-6">Are you sure?</p>
+      <div class="flex justify-end gap-3">
+        <button id="confirmCancelBtn" class="px-4 py-2 bg-gray-200 rounded">Cancel</button>
+        <button id="confirmOkBtn" class="px-4 py-2 bg-red-600 text-white rounded">Yes, confirm</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- success & fail modals -->
+  <div id="successModal" class="modal-fixed" aria-hidden="true">
+    <div class="modal-backdrop"></div>
+    <div class="modal-card bg-white rounded-lg shadow-lg p-6 max-w-md w-full mx-4">
+      <h3 class="text-lg font-semibold mb-2 text-green-600">Success</h3>
+      <p id="successMessage" class="text-gray-700 mb-4">Operation completed successfully.</p>
+      <div class="flex justify-end">
+        <button id="successOkBtn" class="px-4 py-2 bg-green-600 text-white rounded">OK</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="failModal" class="modal-fixed" aria-hidden="true">
+    <div class="modal-backdrop"></div>
+    <div class="modal-card bg-white rounded-lg shadow-lg p-6 max-w-md w-full mx-4">
+      <h3 class="text-lg font-semibold mb-2 text-red-600">Error</h3>
+      <p id="failMessage" class="text-gray-700 mb-4">Something went wrong.</p>
+      <div class="flex justify-end">
+        <button id="failOkBtn" class="px-4 py-2 bg-red-600 text-white rounded">OK</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- scripts -->
+  <script type="module" src="auth.js"></script>
+  <script type="module" src="profile.js"></script>
+</body>
+</html>

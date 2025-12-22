@@ -1,0 +1,558 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Firm Sign-up — Complete Details</title>
+  <style>
+    body{font-family:system-ui,Segoe UI,Roboto,Helvetica,Arial;margin:24px;background:#f6f7fb}
+    .card{background:#fff;padding:20px;border-radius:8px;box-shadow:0 6px 20px rgba(20,20,50,0.06);max-width:920px;margin:0 auto}
+    label{display:block;margin-top:12px;font-weight:600}
+    input,textarea,select{width:100%;padding:10px;margin-top:6px;border:1px solid #dfe3ee;border-radius:6px}
+    button{margin-top:16px;padding:10px 14px;border-radius:8px;border:0;background:#2563eb;color:#fff;font-weight:700}
+    .muted{color:#6b7280;font-size:13px}
+    .small{font-size:13px}
+    .hidden{display:none}
+    .row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    .notice{padding:10px;border-radius:6px;background:#fff9db;border:1px solid #ffe6a7;color:#7a5900}
+    .progress{height:10px;background:#e6eefc;border-radius:999px;overflow:hidden;margin-top:8px}
+    .progress > .bar{height:100%;width:0%}
+
+    /* Modal styles */
+    .modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,0.35);display:flex;align-items:center;justify-content:center;z-index:9999}
+    /* ensure .hidden actually hides modal-backdrop (more specific than generic .hidden) */
+    .modal-backdrop.hidden{display:none !important;}
+    .modal{background:#fff;padding:18px;border-radius:10px;max-width:560px;width:92%;box-shadow:0 10px 40px rgba(10,10,30,0.2)}
+    .modal h3{margin:0 0 8px}
+    .modal .ok{margin-top:12px;background:#10b981;border-radius:8px;padding:8px 12px;color:#fff;border:0}
+    .modal .fail{margin-top:12px;background:#ef4444;border-radius:8px;padding:8px 12px;color:#fff;border:0}
+    .modal .close-x{float:right;cursor:pointer;color:#6b7280}
+
+    /* Small preview grid for selected images */
+    .thumbs{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+    .thumb{width:72px;height:72px;border-radius:6px;overflow:hidden;border:1px solid #e6eefc;display:flex;align-items:center;justify-content:center;background:#fff}
+    .thumb img{max-width:100%;max-height:100%;object-fit:cover}
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h2>Complete your firm registration</h2>
+    <p class="muted">Enter the <strong>user code</strong> you were sent in the email (or follow the link with <code>?code=...</code>), set up your account credentials and fill the firm details. After signing up we will attach the previously uploaded proof (if any) to your account. You must upload pictures for your firm here (unless the student already supplied them during manual addition).</p>
+
+    <div id="status" class="muted small"></div>
+
+    <form id="firm-signup-form">
+      <label>User code (from the email)</label>
+      <input id="userCode" name="userCode" placeholder="e.g. 20251001234567" required />
+
+      <div class="row">
+        <div>
+          <label>Email</label>
+          <input id="email" name="email" type="email" placeholder="you@company.com" required />
+        </div>
+        <div>
+          <label>Phone / contact</label>
+          <input id="phone" name="phone" type="text" placeholder="e.g. +27123456789" />
+        </div>
+      </div>
+
+      <div class="row">
+        <div>
+          <label>Password</label>
+          <input id="password" name="password" type="password" required minlength="6" />
+        </div>
+        <div>
+          <label>Confirm password</label>
+          <input id="confirmPassword" name="confirmPassword" type="password" required minlength="6" />
+        </div>
+      </div>
+
+      <label>Company name</label>
+      <input id="companyName" name="companyName" placeholder="Company / firm name" />
+
+      <div class="row">
+        <div>
+          <label>Representative first name</label>
+          <input id="repFirst" name="repFirst" />
+        </div>
+        <div>
+          <label>Representative last name</label>
+          <input id="repLast" name="repLast" />
+        </div>
+      </div>
+
+      <div class="row">
+        <div>
+          <label>Representative email</label>
+          <input id="repEmail" name="repEmail" type="email" />
+        </div>
+        <div>
+          <label>Representative contact</label>
+          <input id="repContact" name="repContact" type="text" />
+        </div>
+      </div>
+
+      <div class="row">
+        <div>
+          <label>Location (device)</label>
+          <button type="button" id="locBtn" class="" style="margin-top:6px;">Use device location</button>
+          <p id="geo-location-output" class="muted small" style="margin-top:6px"></p>
+        </div>
+        <div>
+          <label>Manual Location</label>
+          <input id="manualLocation" name="manualLocation" />
+        </div>
+      </div>
+
+      <label>Description / services (optional)</label>
+      <textarea id="description" rows="4"></textarea>
+
+      <div class="row">
+        <div>
+          <label>Firm Intake Capacity</label>
+          <input id="capacity" type="number" min="1" placeholder="number of interns/trainees" />
+        </div>
+        <div style="padding-top:26px">
+          <label class="small"><input id="paysSalaries" type="checkbox" /> Pays salaries</label>
+          <label class="small" style="display:block;margin-top:6px"><input id="offersAccommodation" type="checkbox" /> Offers on-firm accommodation</label>
+        </div>
+      </div>
+
+      <label>Practical type (field)</label>
+      <select id="dynamicField">
+        <option value="">-- Select --</option>
+        <option value="agriculture">Agriculture</option>
+        <option value="hospitality">Hospitality</option>
+        <option value="manufacturing">Manufacturing</option>
+        <option value="it">Information Technology</option>
+      </select>
+
+      <label>Upload firm pictures (required unless student already uploaded) — 5 to 10 pictures</label>
+      <input id="uploadPics" type="file" multiple accept="image/*" />
+      <div class="thumbs" id="thumbs"></div>
+      <div class="progress hidden" id="imagesProgress"><div class="bar" id="imagesProgressBar"></div></div>
+
+      <p class="small muted">If we already have a proof file uploaded for your user code (added by a student), it will be linked to your account automatically. The proof metadata will be taken from the Manually-added node if present.</p>
+
+      <div style="display:flex;gap:12px;align-items:center;margin-top:12px">
+        <button id="submit">Create account & Save</button>
+        <div id="spinner" class="hidden muted small">Processing…</div>
+      </div>
+
+    </form>
+
+    <div id="result" class="hidden" style="margin-top:12px"></div>
+  </div>
+
+  <!-- Loading / status modal -->
+  <div id="loadingModal" class="modal-backdrop hidden" role="dialog" aria-modal="true">
+    <div class="modal">
+      <span class="close-x" id="loadingClose" title="Close">✕</span>
+      <h3 id="loadingTitle">Working...</h3>
+      <p id="statusMessage" class="muted small">Please wait.</p>
+      <div class="progress" style="margin-top:12px"><div id="loadingProgress" class="bar"></div></div>
+      <div style="display:flex;justify-content:flex-end"><button id="loadingOk" class="ok hidden">OK</button></div>
+    </div>
+  </div>
+
+  <!-- Success modal -->
+  <div id="successModal" class="modal-backdrop hidden" role="dialog" aria-modal="true">
+    <div class="modal">
+      <span class="close-x" id="successClose" title="Close">✕</span>
+      <h3>Success</h3>
+      <p id="successMessage" class="muted small">Done.</p>
+      <div style="display:flex;justify-content:flex-end"><button id="successOk" class="ok">OK</button></div>
+    </div>
+  </div>
+
+  <!-- Failure modal -->
+  <div id="failModal" class="modal-backdrop hidden" role="dialog" aria-modal="true">
+    <div class="modal">
+      <span class="close-x" id="failClose" title="Close">✕</span>
+      <h3>Error</h3>
+      <p id="failMessage" class="muted small">Something went wrong.</p>
+      <div style="display:flex;justify-content:flex-end"><button id="failOk" class="fail">Close</button></div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-app.js";
+    import { getAuth, createUserWithEmailAndPassword, onAuthStateChanged, deleteUser, signOut } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-auth.js";
+    import { getDatabase, ref, set, get } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-database.js";
+
+    const BACKEND_BASE = "https://project-connect-x4ei.onrender.com"; // your backend
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyBgqE8lMevET8qRWOVMBZ-wTWi_2T5c8Uw",
+      authDomain: "login-wil-47477.firebaseapp.com",
+      databaseURL: "https://login-wil-47477-default-rtdb.firebaseio.com",
+      projectId: "login-wil-47477",
+      storageBucket: "login-wil-47477.appspot.com",
+      messagingSenderId: "457032791224",
+      appId: "1:457032791224:web:9dacb0d6a5658466e3304d"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getDatabase(app);
+
+    const form = document.getElementById('firm-signup-form');
+    const userCodeEl = document.getElementById('userCode');
+    const statusEl = document.getElementById('status');
+    const submitBtn = document.getElementById('submit');
+    const spinner = document.getElementById('spinner');
+    const resultEl = document.getElementById('result');
+    const locBtn = document.getElementById('locBtn');
+    const geoOutput = document.getElementById('geo-location-output');
+    const uploadPicsEl = document.getElementById('uploadPics');
+    const thumbs = document.getElementById('thumbs');
+    const imagesProgress = document.getElementById('imagesProgress');
+    const imagesProgressBar = document.getElementById('imagesProgressBar');
+
+    // modal elements
+    const loadingModal = document.getElementById('loadingModal');
+    const loadingTitle = document.getElementById('loadingTitle');
+    const statusMessage = document.getElementById('statusMessage');
+    const loadingProgress = document.getElementById('loadingProgress');
+    const loadingClose = document.getElementById('loadingClose');
+    const loadingOk = document.getElementById('loadingOk');
+
+    const successModal = document.getElementById('successModal');
+    const successMessage = document.getElementById('successMessage');
+    const successClose = document.getElementById('successClose');
+    const successOk = document.getElementById('successOk');
+
+    const failModal = document.getElementById('failModal');
+    const failMessage = document.getElementById('failMessage');
+    const failClose = document.getElementById('failClose');
+    const failOk = document.getElementById('failOk');
+
+    function showLoading(show, msg = '', percent = null) {
+      if (show) {
+        loadingModal.classList.remove('hidden');
+        loadingTitle.textContent = msg || 'Working...';
+        statusMessage.textContent = msg || '';
+        if (percent !== null) {
+          const p = Math.max(0, Math.min(100, Math.round(percent)));
+          loadingProgress.style.width = p + '%';
+        } else {
+          loadingProgress.style.width = '0%';
+        }
+        loadingOk.classList.add('hidden');
+      } else {
+        loadingModal.classList.add('hidden');
+        loadingProgress.style.width = '0%';
+        statusMessage.textContent = '';
+      }
+    }
+
+    function showSuccessModal(msg) {
+      successMessage.textContent = msg || 'Done.';
+      successModal.classList.remove('hidden');
+    }
+    function closeSuccessModal() { successModal.classList.add('hidden'); }
+
+    function showFailModal(msg) {
+      failMessage.textContent = msg || 'An error occurred';
+      failModal.classList.remove('hidden');
+    }
+    function closeFailModal() { failModal.classList.add('hidden'); }
+
+    loadingClose?.addEventListener('click', () => { showLoading(false); });
+    loadingOk?.addEventListener('click', () => { showLoading(false); });
+    successClose?.addEventListener('click', closeSuccessModal);
+    successOk?.addEventListener('click', closeSuccessModal);
+    failClose?.addEventListener('click', closeFailModal);
+    failOk?.addEventListener('click', closeFailModal);
+
+    function setBusy(b) {
+      submitBtn.disabled = b;
+      spinner.classList.toggle('hidden', !b);
+      if (!b) submitBtn.textContent = 'Create account & Save';
+    }
+
+    function getQueryParam(name) {
+      try { return new URLSearchParams(window.location.search).get(name); } catch { return null; }
+    }
+
+    // Prefill userCode if present in URL (?code=...)
+    const codeFromUrl = getQueryParam('code');
+    if (codeFromUrl) userCodeEl.value = codeFromUrl;
+
+    function showStatus(msg) { statusEl.textContent = msg || ''; }
+    function showResult(msg, success = true) {
+      resultEl.classList.remove('hidden');
+      resultEl.textContent = msg;
+      resultEl.style.color = success ? 'green' : 'crimson';
+    }
+
+    async function fetchManualFirm(code) {
+      const snap = await get(ref(db, `Manually-added/${code}`));
+      return snap.exists() ? snap.val() : null;
+    }
+
+    async function fetchProofMetadataFromBackend(userCode) {
+      try {
+        const res = await fetch(`${BACKEND_BASE}/firm-proof/${encodeURIComponent(userCode)}`);
+        if (!res.ok) return null;
+        return await res.json();
+      } catch (e) { return null; }
+    }
+
+    // upload images to backend using XHR to report progress
+    function uploadFirmImages(userCode, files) {
+      return new Promise((resolve, reject) => {
+        if (!files || files.length === 0) return resolve(null);
+        const formData = new FormData();
+        formData.append('user_code', userCode);
+        formData.append('category', 'will-firm');
+        for (const f of files) formData.append('images', f);
+
+        const xhr = new XMLHttpRequest();
+        xhr.open('POST', `${BACKEND_BASE}/upload-images`, true);
+
+        xhr.upload.onprogress = (evt) => {
+          if (evt.lengthComputable) {
+            const p = Math.round((evt.loaded / evt.total) * 100);
+            imagesProgress.classList.remove('hidden');
+            imagesProgressBar.style.width = p + '%';
+            showStatus(`Uploading pictures... ${p}%`);
+            showLoading(true, `Uploading pictures... ${p}%`, p);
+          }
+        };
+
+        xhr.onload = () => {
+          imagesProgress.classList.add('hidden');
+          imagesProgressBar.style.width = '0%';
+          showLoading(false);
+          if (xhr.status >= 200 && xhr.status < 300) {
+            try { const json = JSON.parse(xhr.responseText); resolve(json); } catch (err) { reject(new Error('Invalid JSON from upload-images: ' + err.message)); }
+          } else {
+            reject(new Error(`Image upload failed: ${xhr.status} ${xhr.responseText || xhr.statusText}`));
+          }
+        };
+
+        xhr.onerror = () => { imagesProgress.classList.add('hidden'); imagesProgressBar.style.width = '0%'; showLoading(false); reject(new Error('Network error during image upload')); };
+        xhr.send(formData);
+      });
+    }
+
+    // preview selected images
+    uploadPicsEl.addEventListener('change', () => {
+      thumbs.innerHTML = '';
+      const files = uploadPicsEl.files ? Array.from(uploadPicsEl.files) : [];
+      files.slice(0,12).forEach(f => {
+        const r = new FileReader();
+        const wrap = document.createElement('div'); wrap.className='thumb';
+        r.onload = (ev) => { const img = document.createElement('img'); img.src = ev.target.result; wrap.appendChild(img); };
+        r.readAsDataURL(f);
+        thumbs.appendChild(wrap);
+      });
+    });
+
+    locBtn.addEventListener('click', () => {
+      if (!navigator.geolocation) {
+        geoOutput.textContent = 'Geolocation not supported by browser.';
+        return;
+      }
+      geoOutput.textContent = 'Locating...';
+      navigator.geolocation.getCurrentPosition(pos => {
+        const lat = pos.coords.latitude.toFixed(6);
+        const lon = pos.coords.longitude.toFixed(6);
+        geoOutput.textContent = `Latitude: ${lat}, Longitude: ${lon}`;
+      }, err => {
+        geoOutput.textContent = 'Unable to retrieve location.';
+      }, { enableHighAccuracy: false, timeout: 8000 });
+    });
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      setBusy(true); showStatus('Validating...'); resultEl.classList.add('hidden');
+
+      const userCode = (userCodeEl.value || '').trim();
+      const email = (document.getElementById('email').value || '').trim();
+      const password = document.getElementById('password').value || '';
+      const confirmPassword = document.getElementById('confirmPassword').value || '';
+      const companyName = (document.getElementById('companyName').value || '').trim();
+      const repFirst = (document.getElementById('repFirst').value || '').trim();
+      const repLast = (document.getElementById('repLast').value || '').trim();
+      const repEmail = (document.getElementById('repEmail').value || '').trim();
+      const repContact = (document.getElementById('repContact').value || '').trim();
+      const phone = (document.getElementById('phone').value || '').trim();
+      const manualLocation = (document.getElementById('manualLocation').value || '').trim();
+      const description = (document.getElementById('description').value || '').trim();
+      const capacity = (document.getElementById('capacity').value || '').trim();
+      const paysSalaries = !!document.getElementById('paysSalaries').checked;
+      const offersAccommodation = !!document.getElementById('offersAccommodation').checked;
+      const dynamicField = (document.getElementById('dynamicField').value || '').trim();
+      const geoLocation = geoOutput.textContent || null;
+      let imageFiles = uploadPicsEl.files ? Array.from(uploadPicsEl.files) : [];
+
+      if (!userCode) { showFailModal('User code is required (check your email).'); setBusy(false); return; }
+      if (!email || !password) { showFailModal('Email and password are required.'); setBusy(false); return; }
+      if (password !== confirmPassword) { showFailModal('Passwords do not match.'); setBusy(false); return; }
+      if (capacity && Number(capacity) < 1) { showFailModal('Capacity must be at least 1.'); setBusy(false); return; }
+
+      try {
+        showLoading(true, 'Checking existing records...', 5);
+
+        const existingUserSnap = await get(ref(db, `users/${userCode}`));
+        if (existingUserSnap.exists()) {
+          showLoading(false);
+          showFailModal('That user code is already registered. If this is your firm contact support.');
+          setBusy(false); return;
+        }
+
+        // Fetch manual metadata (proof file etc.)
+        const manual = await fetchManualFirm(userCode);
+        // If manual doesn't have proof metadata, try backend metadata endpoint
+        let proofMeta = manual?.file ?? null;
+        if (!proofMeta) proofMeta = await fetchProofMetadataFromBackend(userCode) || null;
+
+        // Decide whether images are required: if manual already supplied >=5 images, firm may skip
+        const manualHasImages = Array.isArray(manual?.images) && manual.images.length >= 5;
+
+        if (!manualHasImages && (!imageFiles || imageFiles.length === 0)) {
+          showLoading(false);
+          showFailModal('Please upload 5 to 10 images for your firm (the student only uploaded proof).');
+          setBusy(false);
+          return;
+        }
+
+        if (imageFiles.length > 0 && (imageFiles.length < 5 || imageFiles.length > 10)) {
+          showLoading(false);
+          showFailModal('If uploading images, please upload between 5 and 10 pictures.');
+          setBusy(false);
+          return;
+        }
+
+        // If manual already has images and firm did not upload, we'll use manual images metadata
+        let imagesRes = null;
+        if (imageFiles.length > 0) {
+          showLoading(true, 'Uploading images...', 20);
+          try {
+            imagesRes = await uploadFirmImages(userCode, imageFiles);
+            showLoading(true, 'Images uploaded', 50);
+          } catch (imgErr) {
+            console.warn('Image upload failed:', imgErr);
+            showLoading(false);
+            throw new Error('Image upload failed: ' + (imgErr.message || imgErr));
+          }
+        } else if (manualHasImages) {
+          // Use manual images directly
+          imagesRes = { images: manual.images };
+        }
+
+        showLoading(true, 'Creating account...', 60);
+        let userCredential;
+        try {
+          userCredential = await createUserWithEmailAndPassword(auth, email, password);
+        } catch (authErr) {
+          showLoading(false);
+          throw new Error('Creating account failed: ' + (authErr.message || authErr));
+        }
+
+        const uid = userCredential.user.uid;
+        showLoading(true, 'Saving account details to database...', 80);
+
+        const now = new Date().toISOString();
+
+        const userData = {
+          uid,
+          userCode,
+          email,
+          firstname: repFirst || (manual?.addedByFirstName ?? null),
+          lastname: repLast || (manual?.addedByLastName ?? null),
+          companyName: companyName || manual?.companyName || null,
+          representative: {
+            firstname: repFirst || (manual?.representative?.firstname ?? null),
+            lastname: repLast || (manual?.representative?.lastname ?? null),
+            email: repEmail || (manual?.representative?.email ?? null),
+            contact: repContact || (manual?.representative?.contact ?? null)
+          },
+          phone: phone || manual?.phone || null,
+          geoLocation: geoLocation || manual?.geoLocation || null,
+          manualLocation: manualLocation || manual?.manualLocation || null,
+          description: description || manual?.description || null,
+          capacity: capacity ? Number(capacity) : (manual?.capacity ? Number(manual.capacity) : null),
+          paysSalaries: paysSalaries || !!manual?.paysSalaries,
+          offersAccommodation: offersAccommodation || !!manual?.offersAccommodation,
+          dynamicField: dynamicField || manual?.dynamicField || null,
+          category: 'will-firm',
+          status: false,
+          date: now,
+          proofRegistration: proofMeta ? {
+            id: proofMeta.id ?? null,
+            original_filename: proofMeta.original_filename ?? proofMeta.filename ?? null,
+            filename: proofMeta.filename ?? proofMeta.original_filename ?? null,
+            mime_type: proofMeta.mime_type ?? null,
+            file_url: proofMeta.file_url ? (proofMeta.file_url.startsWith('http') ? proofMeta.file_url : (new URL(proofMeta.file_url, window.location.origin).href)) : null,
+            uploaded_at: proofMeta.uploaded_at ?? now
+          } : null
+        };
+
+        // attach images metadata if backend returned them or manual had them
+        if (imagesRes) {
+          if (Array.isArray(imagesRes.images)) {
+            userData.images = imagesRes.images.map((it, idx) => {
+              const url = it.url ? (it.url.startsWith('http') ? it.url : new URL(it.url, BACKEND_BASE).href) : null;
+              const path = it.path ?? null;
+              return {
+                index: it.index ?? (idx + 1),
+                id: it.id ?? null,
+                path: path,
+                url: url
+              };
+            });
+          } else if (Array.isArray(imagesRes.file_paths)) {
+            const paths = imagesRes.file_paths || [];
+            const urls = imagesRes.file_urls || null;
+            userData.images = paths.map((p, idx) => ({ index: idx + 1, id: null, path: p, url: (urls && urls[idx]) ? urls[idx] : (p.startsWith('http') ? p : (new URL(p, BACKEND_BASE).href)) }));
+          } else {
+            userData.images = [];
+            userData.images_raw = imagesRes;
+          }
+        }
+
+        try {
+          await set(ref(db, `users/${userCode}`), userData);
+        } catch (dbErr) {
+          try { await deleteUser(userCredential.user); } catch(_) { try { await signOut(auth); } catch(_){} }
+          showLoading(false);
+          throw new Error('Saving to database failed: ' + (dbErr.message || dbErr));
+        }
+
+        // Optionally: remove Manually-added entries to avoid duplicates (best-effort)
+        try {
+          if (manual) {
+            await set(ref(db, `Manually-added/${userCode}`), null);
+            await set(ref(db, `Manually-added-Tracking/${userCode}`), null);
+          }
+        } catch (cleanupErr) {
+          console.warn('Failed to remove Manually-added record (best-effort):', cleanupErr);
+        }
+
+        showLoading(false);
+        showSuccessModal('Account created and details saved. You can now log in.');
+        form.reset();
+        thumbs.innerHTML = '';
+        setBusy(false);
+
+        // redirect after short delay when user dismisses modal or automatically after 1.5s
+        setTimeout(() => location.href = 'login.html', 1500);
+
+      } catch (err) {
+        console.error('Sign-up flow failed', err);
+        showLoading(false);
+        showFailModal('Sign-up failed: ' + (err.message || err));
+        setBusy(false);
+      }
+    });
+
+    onAuthStateChanged(auth, (u) => {
+      // no-op: creating a new user will sign them in, we rely on cleanup on DB failure
+    });
+
+  </script>
+</body>
+</html>

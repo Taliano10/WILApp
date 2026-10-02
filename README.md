@@ -85,7 +85,7 @@ welap-wil-platform/
 This project was developed as a final year project at the University of Mpumalanga by Group 7 Software Developers:
 
 Name	Role
-Tiyani Khubayi	Project Lead / Full-Stack Developer
+Tiyani Khubayi	 Full-Stack Developer
 Vincent Matemu Mthuke	Backend Developer
 Thokazani Mavuso	Frontend Developer
 Nkosinathi Msimango	Database Designer
@@ -97,13 +97,8 @@ Team Size: 8 developers
 Project Duration: 2025
 
  Key Achievements
- Reduced WIL placement processing time by 60%
-
- Enabled real-time communication between 200+ students and 50+ employers
 
  Automated weekly progress reporting for lecturers
-
- Created a centralized database of 100+ firms with detailed profiles
 
 Future Improvements
 Mobile app development with Flutter
